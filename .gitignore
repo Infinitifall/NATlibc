@@ -1,0 +1,12 @@
+# eclipse
+.settings/
+.cproject
+.project
+
+# vscode
+.vscode/
+.history/
+
+# build folder
+build/*
+!build/makefile
