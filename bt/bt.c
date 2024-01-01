@@ -1,12 +1,11 @@
 #include <stdlib.h>
-#include <stdint.h>
 
 #include "../record.h"
-#include "bt.h"
+#include "./bt.h"
 
 
-Tree* BT_createTree(int (*recordsCompare) (Record *r1, Record *r2)) {
-    Tree *t = malloc(sizeof(*t));
+B_Tree* BT_createTree(int (*recordsCompare) (NAT_Record *r1, NAT_Record *r2)) {
+    B_Tree *t = malloc(sizeof(*t));
     
     static int tree_count = 0;
     t->id = tree_count;
@@ -19,123 +18,140 @@ Tree* BT_createTree(int (*recordsCompare) (Record *r1, Record *r2)) {
 }
 
 
-Node* BT_createNode(Record *r) {
-    Node *u = malloc(sizeof(*u));
+B_Node* BT_createNode(NAT_Record *record) {
+    B_Node *u = malloc(sizeof(*u));
     
     static int node_count = 0;
     u->id = node_count;
     node_count++;
     
-    u->record = r;
+    u->record = record;
     
-    u->depth_left = 0;
-    u->depth_right = 0;
     u->child_count = 0;
-    u->left = NULL;
-    u->right = NULL;
+    u->depth_left = u->depth_right = 0;
+    u->left = u->right = NULL;
 
     return u;
 }
 
 
-void BT_freeTree(Tree *t) {
+void BT_freeTree(B_Tree *t) {
     if (t == NULL) {
         return;
     }
 
-    BT_freeNodesRecursive(t->root_node);
+    BT_freeNodesR(t->root_node);
     free(t);
 }
 
 
-void BT_freeNode(Node *u) {
+void BT_freeNode(B_Node *u) {
     if (u == NULL) {
         return;
     }
 
-    free(u->record);
+    NAT_freeRecord(u->record);
     free(u);
 }
 
 
-void BT_freeNodesRecursive(Node *u) {
+void BT_freeNodesR(B_Node *u) {
     if (u == NULL) {
         return;
     }
 
-    BT_freeNodesRecursive(u->left);
-    BT_freeNodesRecursive(u->right);
+    BT_freeNodesR(u->left);
+    BT_freeNodesR(u->right);
     BT_freeNode(u);
 }
 
 
-int BT_calculateDepth(Node *u) {
+B_Node* BT_getInOrderMin(B_Node *u) {
+    if (u == NULL) {
+        return NULL;
+    }
+
+    while (u->left != NULL) {
+        u = u->left;
+    }
+
+    return u;
+}
+
+
+B_Node* BT_getInOrderMax(B_Node *u) {
+    if (u == NULL) {
+        return NULL;
+    }
+
+    while (u->right != NULL) {
+        u = u->right;
+    }
+
+    return u;
+}
+
+
+static B_Node* BT_getRandLeaf(B_Node *u) {
+    if (u == NULL) {
+        return NULL;
+    }
+
+    B_Node *random_branch_1, *random_branch_2;
+    int choose_branch = rand() % 2;
+    if (choose_branch == 0) {
+        random_branch_1 = u->left;
+        random_branch_2 = u->right;
+
+    } else {
+        random_branch_1 = u->right;
+        random_branch_2 = u->left;
+    }
+
+    if (random_branch_1 != NULL) {
+        return BT_getRandLeaf(random_branch_1);
+
+    } else if (random_branch_2 != NULL) {
+        return BT_getRandLeaf(random_branch_2);
+    }
+
+    return u;
+}
+
+
+int BT_calcDepth(B_Node *u) {
     if (u == NULL) {
         return 0;
     }
 
-    int depth_left = BT_calculateDepth(u->left);
-    int depth_right = BT_calculateDepth(u->right);
-
-    int depth_max;
-    if (depth_right > depth_left) {
-        depth_max = depth_right;
-    } else {
-        depth_max = depth_left;
-    }
+    int depth_left = BT_calcDepth(u->left);
+    int depth_right = BT_calcDepth(u->right);
     
-    return depth_max + 1;
-}
-
-
-Node* BT_rotateRight(Node *u) {
-	if (u == NULL) {
-        return NULL;
-
-    } else if (u->left == NULL) {
-        return u;
+    if (depth_right > depth_left) {
+        return 1 + depth_right;
+    
+    } else {
+        return 1 + depth_left;
     }
-
-	Node *new_root = u->left;
-    u->left = new_root->right;
-	new_root->right = u;
-
-    return new_root;
 }
 
 
-Node* BT_rotateLeft(Node *u) {
-	if (u == NULL) {
-        return NULL;
-
-    } else if (u->right == NULL) {
-        return u;
-    }
-
-	Node *new_root = u->right;
-    u->right = new_root->left;
-	new_root->left = u;
-
-    return new_root;
-}
-
-
-Node* BT_searchRecursive(Node *u, Record *r, int (*recordsCompare) (Record *r1, Record *r2)) {
+B_Node* BT_searchR(B_Node *u, NAT_Record *r, int (*f) (NAT_Record *r1, NAT_Record *r2)) {
     if (u == NULL) {
         return NULL;
     }
     
-    int compare_value = (*recordsCompare)(r, u->record);
+    int compare_value = (*f)(r, u->record);
     if (compare_value == 0) {
         return u;
     }
 
-    Node *search_left = BT_searchRecursive(u->left, r, recordsCompare);
+    B_Node *search_left = BT_searchR(u->left, r, f);
     if (search_left != NULL) {
         return search_left;
     }
     
-    Node *search_right = BT_searchRecursive(u->right, r, recordsCompare);
+    B_Node *search_right = BT_searchR(u->right, r, f);
     if (search_right != NULL) {
         return search_right;
     }
@@ -144,6 +160,69 @@ Node* BT_searchRecursive(Node *u, Record *r, int (*recordsCompare) (Record *r1, 
 }
 
 
-Node* BT_search(Tree *t, Record *r) {
-    return BT_searchRecursive(t->root_node, r, t->recordsCompare);
+B_Node* BT_search(B_Tree *t, NAT_Record *r) {
+    return BT_searchR(t->root_node, r, t->recordsCompare);
+}
+
+
+void BT_insert(B_Tree *t, NAT_Record *r) {
+    t->root_node = BT_insertR(t->root_node, r);
+}
+
+
+B_Node* BT_insertR(B_Node *u, NAT_Record *r) {
+    if (u == NULL) {
+        return BT_createNode(r);
+    }
+
+    int choose_branch = rand() % 2;
+    // TODO: depth and child calculations
+    // TODO: non random, uniform filling
+    if (choose_branch == 0) {
+        u->left = BT_insertR(u->left, r);
+        
+    } else {
+        u->right = BT_insertR(u->right, r);
+    }
+
+    return u;
+}
+
+
+void BT_delete(B_Tree *t, NAT_Record *r) {
+    if (t == NULL) {
+        return;
+    }
+
+    t->root_node = BT_deleteR(t->root_node, r, t->recordsCompare);
+}
+
+
+B_Node* BT_deleteR(B_Node *u, NAT_Record *r, int (*f) (NAT_Record *r1, NAT_Record *r2)) {
+    if (u == NULL) {
+        return NULL;
+    }
+    
+    int compare_value = (*f)(r, u->record);
+    if (compare_value == 0) {
+        // TODO: depth and child calculations
+        // TODO: non random, uniform leaf choose (?)
+        // TODO: delete parent link of random_leaf
+        B_Node *random_leaf = BT_getRandLeaf(u);
+        random_leaf->right = u->right;
+        random_leaf->left = u->left;
+        BT_freeNode(u);
+        u = random_leaf;
+    }
+    
+    if (u->right != NULL) {
+        u->right = BT_deleteR(u->right, r, f);
+    }
+    
+    if (u->left != NULL) {
+        u->left = BT_deleteR(u->left, r, f);
+    }
+
+    // TODO: does this delete all nodes with record r?
+    return u;
 }

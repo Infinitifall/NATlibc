@@ -1,10 +1,9 @@
-#ifndef RECORD_H_
-#define RECORD_H_
+#ifndef NAT_RECORD_H_
+#define NAT_RECORD_H_
 
 
-typedef struct record {
-
-    // Unique id for every record
+typedef struct nat_record {
+    // unique id for record
     int id;
 
     int value;
@@ -14,27 +13,34 @@ typedef struct record {
      * 
      */
 
-} Record;
+} NAT_Record;
 
 
 /**
- * @brief Create a new Record object
+ * @brief Create new record
  * 
- * @param id The id field of the record
- * @param value The value field of the record
- * @return Record* Pointer to the created record
+ * @param value The "value" field of the created record
+ * @return NAT_Record* Pointer to created record
  */
-Record* NAT_createRecord(int value);
+NAT_Record* NAT_createRecord(int value);
 
 
 /**
- * @brief Compare two records (in order: value, id)
+ * @brief Free record r
  * 
- * @param r1 
- * @param r2 
- * @return int Positive if r2 > r1, negative if r2 < r1 and 0 if they are equal
+ * @param r Pointer to record
  */
-int NAT_recordsCompare1(Record *r1, Record *r2);
+void NAT_freeRecord(NAT_Record *r);
+
+
+/**
+ * @brief A function to compare records. Compares by: value, id
+ * 
+ * @param r1 Pointer to record 1
+ * @param r2 Pointer to record 2
+ * @return int > 0 if |r1| > |r2|, < 0 if |r1| < |r2|, == 0 if |r1| == |r2|
+ */
+int NAT_recordsCompare1(NAT_Record *r1, NAT_Record *r2);
 
 
 /**

@@ -14,20 +14,20 @@ record.o: ../record.c
 bt.o: ../bt/bt.c
 	$(CC) $(CFLAGS) -c ../bt/bt.c
 
-bt_print.o: ../bt/bt_print.c
-	$(CC) $(CFLAGS) -c ../bt/bt_print.c
-
-bt_read.o: ../bt/bt_read.c
-	$(CC) $(CFLAGS) -c ../bt/bt_read.c
+bt_io.o: ../bt/bt_io.c
+	$(CC) $(CFLAGS) -c ../bt/bt_io.c
 
 bst.o: ../bt/bst/bst.c
 	$(CC) $(CFLAGS) -c ../bt/bst/bst.c
 
+avl.o: ../bt/bst/avl/avl.c
+	$(CC) $(CFLAGS) -c ../bt/bst/avl/avl.c
+
 # End n-ary-trees
 
 
-example: example.o bst.o bt_read.o bt_print.o bt.o record.o
-	$(CC) $(CFLAGS) -o example example.o bst.o bt_read.o bt_print.o bt.o record.o
+example: example.o bst.o bt_io.o bt.o record.o
+	$(CC) $(CFLAGS) -o example example.o bst.o bt_io.o bt.o record.o
 
 example.o: ../example.c
 	$(CC) $(CFLAGS) -c ../example.c
@@ -37,12 +37,14 @@ example.o: ../example.c
 clean:
 	$(RM) record.o
 	$(RM) bt.o
-	$(RM) bt_read.o
-	$(RM) bt_print.o
+	$(RM) bt_io.o
 	$(RM) bst.o
+	$(RM) avl.o
 
 	$(RM) example
 	$(RM) example.o
-
-	$(RM) simple
-	$(RM) simple.o
+	
+	$(RM) bt_print.o
+	$(RM) bt_print
+	$(RM) bt_read.o
+	$(RM) bt_read

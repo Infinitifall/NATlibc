@@ -1,8 +1,20 @@
-# n-ary trees
+# NATlibc (n-ary trees)
 
-***Note: Incomplete, work in progress!***
+A tiny standalone library for trees in C.
 
-An implementation of [trees](https://en.wikipedia.org/wiki/Tree_(data_structure)) in C.
+- Zero-dependency
+- Extensively documented
+- < 1000 SLOC
+
+
+|Progress   |Module                 |Header file                    |
+|-----------|-----------------------|-------------------------------|
+|✅         |Records                | [record.h](./record.h)        |
+|🚧         |Binary trees           | [bt.h](./bt/bt.h)             |
+|🚧         |Binary search trees    | [bst.h](./bt/bst/bst.h)       |
+|❌         |AVL trees              | [avl.h](./bt/bst/avl/avl.h)   |
+|❌         |N-ary trees            | -                             |
+|❌         |Common binary tree algorithms      | -                             |
 
 
 ## Install
@@ -19,7 +31,7 @@ make
 
 ## Use
 
-Run the code in [example.c](example.c), which defines a small tree and prints it
+Run the code in [example.c](./example.c), which defines a small tree and prints it
 
 ```bash
 # run example
@@ -28,7 +40,7 @@ cd build
 ```
 
 ```
-Warn: node 0 at 0x56404a5d54b0 has no parents, setting as root node.
+Note: node 0 at 0x55bb67ced4b0 has no parents, setting as root node.
 
 |      |      |______3,33
 |      |______2,7

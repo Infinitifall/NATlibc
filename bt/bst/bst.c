@@ -1,28 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../record.h"
 #include "../bt.h"
 #include "bst.h"
 
 
-Node* BST_searchRecursive(Node *u, Record *r, int (*recordsCompare) (Record *r1, Record *r2)) {
+B_Node* BST_searchR(B_Node *u, NAT_Record *r, int (*f) (NAT_Record *r1, NAT_Record *r2)) {
     if (u == NULL) {
         return NULL;
     }
     
-    int compare_value = (*recordsCompare)(r, u->record);
-    if (compare_value > 0) {
-        return BST_searchRecursive(u->right, r, recordsCompare);
+    int compare_value = (*f)(r, u->record);
+    if (compare_value < 0) {
+        return BST_searchR(u->left, r, f);
 
-    } else if (compare_value < 0) {
-        return BST_searchRecursive(u->left, r, recordsCompare);
-
-    } else {
-        return u;
+    } else if (compare_value > 0) {
+        return BST_searchR(u->right, r, f);
     }
+    
+    return u;
 }
 
 
-Node* BST_search(Tree *t, Record *r) {
-    return BST_searchRecursive(t->root_node, r, t->recordsCompare);
+B_Node* BST_search(B_Tree *t, NAT_Record *r) {
+    return BST_searchR(t->root_node, r, t->recordsCompare);
 }

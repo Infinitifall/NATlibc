@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "record.h"
-#include "bt/bt.h"
-#include "bt/bt_read.h"
-#include "bt/bt_print.h"
-#include "bt/bst/bst.h"
+#include "./record.h"
+#include "./bt/bt.h"
+#include "./bt/bt_io.h"
+#include "./bt/bst/bst.h"
 
 
 int main(int argc, char const *argv[]) {
@@ -32,7 +31,7 @@ int main(int argc, char const *argv[]) {
     }
 
     // convert to tree
-    Node *u = BT_readInts(eg_pointer, eg_nodes_count);
+    B_Tree *u = BT_readInts(eg_pointer, eg_nodes_count, *NAT_recordsCompare1);
 
     // print tree
     printf("\n");
@@ -42,7 +41,7 @@ int main(int argc, char const *argv[]) {
 
     // free up everything
     free(eg_pointer);
-    BT_freeNodesRecursive(u);
+    BT_freeTree(u);
 
     return 0;
 }
